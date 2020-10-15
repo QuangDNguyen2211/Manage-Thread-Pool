@@ -15,14 +15,17 @@ class ThreadPool {
         static const auto QUEUE_SIZE = 10;
         static const auto NUMBER_OF_THREADS = 10;
 
-        Task worktodo;
-        pthread_t bee;
+        Queue workToDo;
+        vector <pthread_t> threadPool;
+        pthread_t thread;
+        sem_t sem;
 
-        int enqueue(Task t);
+        int enqueue(Task w);
         Task dequeue();
         void execute(void (*)(void *), void *);
 
         static void *worker(void *);
 };
+
 
 #endif
