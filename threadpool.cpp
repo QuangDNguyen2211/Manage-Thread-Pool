@@ -3,55 +3,55 @@
 #include <unistd.h>
 
 #include "threadpool.h"
+#include <semaphore.h>
 
 using std::ignore;
 
-int ThreadPool::enqueue(Task t) {
-    ignore = t;
-
+int ThreadPool::enqueue(Task work)
+{
+    Queue.push(work);
     return 0;
 }
 
 Task ThreadPool::dequeue()
-{
-    return worktodo;
-}
+{ return Queue.pop(); }
 
-
+// I'm not sure about this worker function
 void *ThreadPool::worker(void *param)
 {
-    /*
-     * pthread_create() expects a C function, not a C++ member function,
-     * so we're going to have to do this ourselves...
-     *
-     */
-
-    ThreadPool *self = reinterpret_cast<ThreadPool *>(param);
-
-    self->execute(self->worktodo.function, self->worktodo.data);
-
-    pthread_exit(NULL);
+    if(!workToDo.isEmpty())
+    {
+      Task work = dequeue();
+      execute(work.function, work.data);
+    }
 }
 
 void ThreadPool::execute(void (*somefunction)(void *p), void *p)
-{
-    somefunction(p);
-}
+{ somefunction(p);}
 
 ThreadPool::ThreadPool()
 {
-    pthread_create(&bee, NULL, ThreadPool::worker, this);
+    for(int c = 0; c < NUMBER_OF_THREADS; c++)
+    {
+      pthread_create(&thread, NULL, ThreadPool::worker, this);
+      threadPool.push_back(thread);
+    }
 }
 
 int ThreadPool::submit(void (*somefunction)(void *), void *p)
 {
-    worktodo.function = somefunction;
-    worktodo.data = p;
+    Task work;
+    work.function = somefunction;
+    work.data = p;
+
+    enqueue(work);
 
     return 0;
 }
 
 void ThreadPool::shutdown()
 {
-    pthread_join(bee, NULL);
+  for(int c = 0; c < NUMBER_OF_THREADS; c++)
+    if(threadPool[i].joinable())
+      threadPool[i].join();
 }
