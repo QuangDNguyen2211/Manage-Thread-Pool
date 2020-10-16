@@ -9,12 +9,12 @@ using std::ignore;
 
 int ThreadPool::enqueue(Task work)
 {
-    Queue.push(work);
+    workToDo.push(work);
     return 0;
 }
 
 Task ThreadPool::dequeue()
-{ return Queue.pop(); }
+{ return workToDo.pop(); }
 
 // I'm not sure about this worker function
 void *ThreadPool::worker(void *param)
