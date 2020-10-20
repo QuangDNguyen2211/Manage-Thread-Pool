@@ -7,8 +7,7 @@
 //Because worker is static, in order to work everything needs to be static
 //That's why it needs to be redefine in threadpool.cpp
 pthread_mutex_t ThreadPool::mutexQueue;
-mutex ThreadPool::cout_mutex;
-pthread_cond_t ThreadPool::workAvailable;
+sem_t ThreadPool::sem;
 std::queue<Task> ThreadPool::workToDo;
 
 //lock -> push the work in the queue -> unlock -> signal the thread
@@ -21,18 +20,12 @@ int ThreadPool::enqueue(Task work)
 
 	pthread_mutex_unlock(&mutexQueue);
 
-	pthread_cond_signal(&workAvailable);
-
   return 0;
 }
 
 Task ThreadPool::dequeue()
 {
 	pthread_mutex_lock(&mutexQueue);
-
-	//If there is no work, all the thread will be on the waiting state
-	while(workToDo.empty())
-		pthread_cond_signal(&workAvailable);
 
 	Task work = workToDo.front();
 	workToDo.pop();
@@ -49,8 +42,10 @@ void *ThreadPool::worker(void *param)
 
   while(!workToDo.empty())
   {
+			 sem_post(&sem);
 	     work = self->dequeue();
 	     self->execute(work.function, work.data);
+			 sem_wait(&sem);
 	}
 
   pthread_exit(NULL);
@@ -58,15 +53,13 @@ void *ThreadPool::worker(void *param)
 
 void ThreadPool::execute(void (*somefunction)(void *p), void *p)
 {
-	//With unique_lock, it will automatically unlock after the leaving the scope
-	unique_lock<mutex> lock(cout_mutex);
   somefunction(p);
 }
 
 ThreadPool::ThreadPool()
 {
 	pthread_mutex_init(&mutexQueue,NULL);
-  pthread_cond_init(&workAvailable,NULL);
+	sem_init(&sem, 0, 0);
 
   for(int c = 0; c < NUMBER_OF_THREADS; c++)
     pthread_create(&thread[c], NULL, ThreadPool::worker, this);
@@ -89,5 +82,5 @@ void ThreadPool::shutdown()
       pthread_join(thread[c], NULL);
 
   pthread_mutex_destroy(&mutexQueue);
-  pthread_cond_destroy(&workAvailable);
+	sem_destroy(&sem);
 }

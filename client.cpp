@@ -31,7 +31,7 @@ int main()
 	{
 		work[i].a = i;
     work[i].b = i + 1;
-		pool.submit(&add, &work[i]);
+		pool.submit(add, &work[i]);
 	}
 
   pool.shutdown();

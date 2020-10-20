@@ -27,10 +27,7 @@ class ThreadPool {
 
 	//The mutexQueue is used to protect access to the queue
         static pthread_mutex_t mutexQueue;
-        //The cout_mutex is used to protect the final cout
-        static mutex cout_mutex;
-        //The workAvailable is used to signal if there's work in the queue
-        static pthread_cond_t workAvailable;
+        static sem_t sem;
         
         //Thread pool
         pthread_t thread[NUMBER_OF_THREADS];
