@@ -1,6 +1,7 @@
 #include <cstdlib>
+#include <stdlib.h>
 #include <iostream>
-
+#include <unistd.h>
 #include "threadpool.h"
 
 using std::cout;
@@ -9,6 +10,8 @@ using std::endl;
 struct data {
     int a, b;
 };
+
+const int number_of_job = 10;
 
 void add(void *param)
 {
@@ -20,16 +23,18 @@ void add(void *param)
 
 int main()
 {
-    // create some work to do
-    data work = {5, 10};
+	ThreadPool pool;
+  data work[number_of_job];
 
-    ThreadPool pool;
-    pool.submit(add, &work);
+  //Submit works for the program to do
+	for(int i = 0; i < number_of_job; ++i)
+	{
+		work[i].a = i;
+    work[i].b = i + 1;
+		pool.submit(&add, &work[i]);
+	}
 
-    // may be helpful
-    // sleep(3);
+  pool.shutdown();
 
-    pool.shutdown();
-
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
