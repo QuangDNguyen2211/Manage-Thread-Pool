@@ -1,6 +1,6 @@
 This 'README.md' file is based on the source: https://github.com/ProfAvery/cpsc351/tree/main/project3
 # Team Members: 
-Vinh Tran (Email: kimvinh@csu.fullerton.edu) 
+Vinh Tran (Email: kimvinh@csu.fullerton.edu)  
 Quang Nguyen (Email: quangdnguyen2211@csu.fullerton.edu)
 # Course: CPSC 351 - 04
 # Professor: Kenytt Avery
