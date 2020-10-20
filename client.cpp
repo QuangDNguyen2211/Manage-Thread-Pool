@@ -1,3 +1,11 @@
+/*
+  Team Members: Vinh Tran (Email: kimvinh@csu.fullerton.edu)
+								Quang Nguyen (Email: quangdnguyen2211@csu.fullerton.edu)
+  Course: CPSC 351 - 04
+  Professor: Kenytt Avery
+  Project 3: Designing a Thread Pool
+*/
+
 #include <cstdlib>
 #include <stdlib.h>
 #include <iostream>
@@ -24,19 +32,17 @@ int main() {
 
   // Initialize the thread pool
 	ThreadPool pool;
-  // Initialize the array which contains 10 'data' struct
+  // Initialize the array which contains 'data' structs
   data works[number_of_job];
 
   srand(time(NULL));
-
-  // Submit works for the program to do
 	for(int i = 0; i < number_of_job; ++i) {
     // Generate a random number from 0 to 4 and assign it to the value 'a' of 'data' struct
 		works[i].a = rand() % 5;
     // Generate a random number from 5 to 9 and assign it to the value 'b' of 'data' struct
     works[i].b = rand() % 5 + 5;
 
-    // Sub mit a task to the thread pool
+    // Submit a task to the thread pool
 		pool.submit(add, &works[i]);
 	}
 

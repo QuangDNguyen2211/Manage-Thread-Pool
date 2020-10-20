@@ -1,3 +1,11 @@
+/*
+  Team Members: Vinh Tran (Email: kimvinh@csu.fullerton.edu)
+								Quang Nguyen (Email: quangdnguyen2211@csu.fullerton.edu)
+  Course: CPSC 351 - 04
+  Professor: Kenytt Avery
+  Project 3: Designing a Thread Pool
+*/
+
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
 
@@ -17,7 +25,8 @@ class ThreadPool {
         void shutdown();
 
     private:
-        static const int QUEUE_SIZE = 10;
+        // static const int QUEUE_SIZE = 10;
+
         static const int NUMBER_OF_THREADS = 10;
 
 	      // 'mutexQueue' is used to protect access to the queue

@@ -1,10 +1,20 @@
+# Team Members: Vinh Tran (Email: kimvinh@csu.fullerton.edu)
+#	        Quang Nguyen (Email: quangdnguyen2211@csu.fullerton.edu)
+# Course: CPSC 351 - 04
+# Professor: Kenytt Avery
+
+This 'README.md' file is based on the source: https://github.com/ProfAvery/cpsc351/tree/main/project3
+
 # Project 3 - Designing a Thread Pool
 
-These files are a C++ version of the files that support the POSIX
-implementation of the thread pool project from *Operating Systems
-Concepts, 10th Edition* by Silberschatz, Galvin, and Gagne.
+This project is to create and manage a thread pool which contains 10 threads to execute tasks submitted to the pool. We implemented
+the queue dynamatically by using a linked list. Therefore, its size is full when a memory allocation error occurs. 
 
-## Source files:
+## "CPSC-351-Project3.tar.gz" Contents:
+
+- `README.md` (this file)
+
+- `Makefile` (instruct how to compile and run the program)
 
 - `client.cpp` (client program that uses thread pool)
 
@@ -23,16 +33,3 @@ To check for memory leaks, enter `make check-leaks`
 To check for race conditions, enter `make check-threads`
 
 To check for both, `make check`
-
-### Tips
-
-1. Note that `make check-threads` reports that there is already a possible
-   race condition.
-
-   The code is safe to run as-is, but the conflicts reported should help
-   you determine where to apply mutex locks.
-
-2. If you are using WSL, `make check-threads` will fail with a
-   segmentation fault. To check thread behavior with Helgrind you will
-   need to run the code on a standard Linux virtual machine.
-
