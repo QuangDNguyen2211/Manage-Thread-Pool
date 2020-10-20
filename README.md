@@ -1,9 +1,10 @@
-# Team Members: Vinh Tran (Email: kimvinh@csu.fullerton.edu)
-#	        Quang Nguyen (Email: quangdnguyen2211@csu.fullerton.edu)
+# Team Members: 
+Vinh Tran (Email: kimvinh@csu.fullerton.edu)
+Quang Nguyen (Email: quangdnguyen2211@csu.fullerton.edu)
 # Course: CPSC 351 - 04
 # Professor: Kenytt Avery
 
-This 'README.md' file is based on the source: https://github.com/ProfAvery/cpsc351/tree/main/project3
+# This 'README.md' file is based on the source: https://github.com/ProfAvery/cpsc351/tree/main/project3
 
 # Project 3 - Designing a Thread Pool
 
