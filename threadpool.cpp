@@ -8,23 +8,32 @@
 
 #include <tuple>
 #include <unistd.h>
-#include <iostream>
+#include <semaphore.h>
 #include "threadpool.h"
+#include <iostream>
 
-pthread_mutex_t ThreadPool::mutexQueue;
-sem_t ThreadPool::sem;
+pthread_mutex_t mutexQueue;
+sem_t sem;
 std::queue<Task> ThreadPool::workToDo;
 
 int ThreadPool::enqueue(Task t) {
 	// Acquire the mutex lock
 	pthread_mutex_lock(&mutexQueue);
 
-	// Push 'work' into the queue
-	workToDo.push(t);
+	if (workToDo.size() < QUEUE_SIZE) {
+		// Push 'work' into the queue
+		workToDo.push(t);
+	} else {
+		pthread_mutex_unlock(&mutexQueue);
+
+		// The task cannot be put into the queue
+		// Since the queue is full
+		return 1;
+	}
 
 	// Release the mutex lock
 	pthread_mutex_unlock(&mutexQueue);
-
+	// The task successfully put into the queue
   return 0;
 }
 
@@ -47,19 +56,15 @@ void *ThreadPool::worker(void *param) {
 	ThreadPool *self = reinterpret_cast<ThreadPool *>(param);
 	Task work;
 
-	// Wait for available work
-	sem_wait(&sem);
+	while (true) {
+		sem_wait(&sem);
 
-	while (!workToDo.empty()) {
 		// Remove the work from the queue
 		work = self->dequeue();
 
 		// Run the specified function
 		self->execute(work.function, work.data);
 	}
-
-	// Unlock the semaphore
-	sem_post(&sem);
 
   pthread_exit(NULL);
 }
@@ -73,7 +78,7 @@ ThreadPool::ThreadPool() {
 	pthread_mutex_init(&mutexQueue,NULL);
 
 	// Initialize a semaphore
-	sem_init(&sem, 0, 1);
+	sem_init(&sem, 0, 0);
 
 	// Create threads
   for(int i = 0; i < NUMBER_OF_THREADS; i++) {
@@ -86,13 +91,20 @@ int ThreadPool::submit(void (*somefunction)(void *), void *p) {
 	Task work;
 	work.function = somefunction;
 	work.data = p;
-  enqueue(work);
+  int success = enqueue(work);
 
-  return 0;
+	// If 'success' = 0, the task is successfuly put into the queue
+	if (success == 0) {
+		// Signal the threads in the pool
+		sem_post(&sem);
+	}
+
+  return success;
 }
 
 void ThreadPool::shutdown() {
   for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+		pthread_cancel(thread[i]);
     pthread_join(thread[i], NULL);
 	}
 
