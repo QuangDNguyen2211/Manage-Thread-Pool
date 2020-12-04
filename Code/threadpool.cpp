@@ -15,7 +15,6 @@
 pthread_mutex_t mutexQueue;
 sem_t sem;
 std::queue<Task> ThreadPool::workToDo;
-bool active;
 
 int ThreadPool::enqueue(Task t) {
 	// Acquire the mutex lock
@@ -25,35 +24,18 @@ int ThreadPool::enqueue(Task t) {
 
 	// Release the mutex lock
 	pthread_mutex_unlock(&mutexQueue);
-	// The task successfully put into the queue
+
   return 0;
 }
 
 Task ThreadPool::dequeue() {
-	// Acquire the mutex lock
-	pthread_mutex_lock(&mutexQueue);
 
 	// Retrieve the work in the head of queue and assign to 'work'
 	Task work = workToDo.front();
 	// Remove it from the queue
 	workToDo.pop();
 
-	// Release the mutex lock
-	pthread_mutex_unlock(&mutexQueue);
-
 	return work;
-}
-
-bool ThreadPool::check_active(){
-	// Acquire the mutex lock
-	pthread_mutex_lock(&mutexQueue);
-
-	if(workToDo.empty())
-		active = false;
-	// Release the mutex lock
-	pthread_mutex_unlock(&mutexQueue);
-
-	return active;
 }
 
 void *ThreadPool::worker(void *param) {
@@ -63,10 +45,19 @@ void *ThreadPool::worker(void *param) {
 	while (true) {
 		sem_wait(&sem);
 
-		if(!self->check_active())
+		pthread_mutex_lock(&mutexQueue);
+
+		// Breaking condition
+		if(workToDo.empty())
+		{
+			pthread_mutex_unlock(&mutexQueue);
 			break;
+		}
+
 		// Remove the work from the queue
 		work = self->dequeue();
+
+		pthread_mutex_unlock(&mutexQueue);
 
 		// Run the specified function
 		self->execute(work.function, work.data);
@@ -85,8 +76,6 @@ ThreadPool::ThreadPool() {
 	// Initialize a semaphore
 	sem_init(&sem, 0, 0);
 
-	active = true;
-
 	// Create threads
   for(int i = 0; i < NUMBER_OF_THREADS; i++) {
     pthread_create(&thread[i], NULL, ThreadPool::worker, this);
@@ -98,7 +87,7 @@ int ThreadPool::submit(void (*somefunction)(void *), void *p) {
 	Task work;
 	work.function = somefunction;
 	work.data = p;
-  int success = enqueue(work);
+  auto success = enqueue(work);
 
 	// If 'success' = 0, the task is successfuly put into the queue
 	if (success == 0) {

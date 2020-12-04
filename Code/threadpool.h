@@ -37,7 +37,6 @@ class ThreadPool {
         int enqueue(Task t);
         Task dequeue();
         void execute(void (*)(void *), void *);
-        bool check_active();
 
         static void *worker(void *);
 };
