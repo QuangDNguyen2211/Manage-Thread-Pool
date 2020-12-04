@@ -20,34 +20,22 @@ int ThreadPool::enqueue(Task t) {
 	// Acquire the mutex lock
 	pthread_mutex_lock(&mutexQueue);
 
-	if (workToDo.size() < QUEUE_SIZE) {
-		// Push 'work' into the queue
-		workToDo.push(t);
-	} else {
-		pthread_mutex_unlock(&mutexQueue);
-
-		// The task cannot be put into the queue
-		// Since the queue is full
-		return 1;
-	}
+	// Put a task into the queue
+	workToDo.push(t);
 
 	// Release the mutex lock
 	pthread_mutex_unlock(&mutexQueue);
-	// The task successfully put into the queue
+
   return 0;
 }
 
 Task ThreadPool::dequeue() {
-	// Acquire the mutex lock
-	pthread_mutex_lock(&mutexQueue);
 
 	// Retrieve the work in the head of queue and assign to 'work'
 	Task work = workToDo.front();
+
 	// Remove it from the queue
 	workToDo.pop();
-
-	// Release the mutex lock
-	pthread_mutex_unlock(&mutexQueue);
 
 	return work;
 }
@@ -59,13 +47,22 @@ void *ThreadPool::worker(void *param) {
 	while (true) {
 		sem_wait(&sem);
 
+		pthread_mutex_lock(&mutexQueue);
+
+		// Breaking condition
+		if(workToDo.empty()) {
+			pthread_mutex_unlock(&mutexQueue);
+			break;
+		}
+
 		// Remove the work from the queue
 		work = self->dequeue();
+
+		pthread_mutex_unlock(&mutexQueue);
 
 		// Run the specified function
 		self->execute(work.function, work.data);
 	}
-
   pthread_exit(NULL);
 }
 
@@ -91,20 +88,17 @@ int ThreadPool::submit(void (*somefunction)(void *), void *p) {
 	Task work;
 	work.function = somefunction;
 	work.data = p;
-  int success = enqueue(work);
+  enqueue(work);
+	sem_post(&sem);
 
-	// If 'success' = 0, the task is successfully put into the queue
-	if (success == 0) {
-		// Signal the threads in the pool
-		sem_post(&sem);
-	}
-
-  return success;
+  return 0;
 }
 
 void ThreadPool::shutdown() {
+	for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+		sem_post(&sem);
+	}
   for (int i = 0; i < NUMBER_OF_THREADS; i++) {
-		pthread_cancel(thread[i]);
     pthread_join(thread[i], NULL);
 	}
 
