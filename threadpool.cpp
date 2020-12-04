@@ -93,7 +93,7 @@ int ThreadPool::submit(void (*somefunction)(void *), void *p) {
 	work.data = p;
   int success = enqueue(work);
 
-	// If 'success' = 0, the task is successfuly put into the queue
+	// If 'success' = 0, the task is successfully put into the queue
 	if (success == 0) {
 		// Signal the threads in the pool
 		sem_post(&sem);
